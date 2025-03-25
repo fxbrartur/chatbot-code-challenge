@@ -2,7 +2,7 @@ import asyncio
 import websockets
 
 # WebSocket URL
-WEBSOCKET_URL = "ws://localhost:8000/ws/1/beer_preferences"
+WEBSOCKET_URL = "ws://localhost:8000/ws/2/beer_preferences"
 
 # Centralized error messages
 TECHNICAL_DIFFICULTIES_MESSAGE = "We are experiencing technical difficulties. Please try again later."
