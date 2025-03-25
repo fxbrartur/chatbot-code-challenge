@@ -78,12 +78,4 @@ class MockRPCDatabase:
         self.simulate_rpc_call()
         if survey_id in SURVEYS:
             del SURVEYS[survey_id]
-
-    def delete_survey_response(self, response_id: str) -> bool:
-        """Delete a specific survey response."""
-        self.simulate_rpc_call()
-        for i, response in enumerate(mock_db["survey_responses"]):
-            if response.get("id") == response_id:
-                del mock_db["survey_responses"][i]
-                return True
-        return False
+            

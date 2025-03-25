@@ -63,14 +63,3 @@ async def delete_survey(survey_id: str):
         return {"message": "Survey deleted successfully."}
     except ConnectionError:
         raise HTTPException(status_code=500, detail="Failed to delete survey due to RPC error.")
-
-@router.delete("/admin/survey_responses/{response_id}")
-async def delete_survey_response(response_id: str):
-    """Delete a specific survey response."""
-    try:
-        deleted = await retrier.call(db.delete_survey_response, response_id)
-        if not deleted:
-            raise HTTPException(status_code=404, detail="Survey response not found.")
-        return {"message": "Survey response deleted successfully."}
-    except ConnectionError:
-        raise HTTPException(status_code=500, detail="Failed to delete survey response due to RPC error.")

@@ -77,11 +77,3 @@ def test_delete_survey():
     response = client.delete(f"/admin/surveys/{test_survey['survey_id']}")
     assert response.status_code == 200
     assert response.json() == {"message": "Survey deleted successfully."}
-
-
-def test_delete_survey_response():
-    """Test deleting a specific survey response."""
-    # Assuming no responses exist initially
-    response = client.delete(f"/admin/survey_responses/{test_response_id}")
-    assert response.status_code == 404
-    assert response.json() == {"detail": "Survey response not found."}
