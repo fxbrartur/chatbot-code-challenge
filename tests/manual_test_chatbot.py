@@ -2,12 +2,13 @@ import asyncio
 import websockets
 
 # WebSocket URL
-WEBSOCKET_URL = "ws://localhost:8000/ws/1/ice_cream_preferences"
+WEBSOCKET_URL = "ws://localhost:8000/ws/1/beer_preferences"
 
-# Centralized error message
+# Centralized error messages
 TECHNICAL_DIFFICULTIES_MESSAGE = "We are experiencing technical difficulties. Please try again later."
 CUSTOMER_NOT_FOUND_MESSAGE = "Customer not found."
 SURVEY_NOT_FOUND_MESSAGE = "Survey not found."
+SURVEY_ALREADY_COMPLETED_MESSAGE = "You have already completed this survey"
 
 async def interactive_chatbot():
     retry_attempts = 3  # Maximum number of reconnection attempts
@@ -33,6 +34,11 @@ async def interactive_chatbot():
                         # Check if the server sent "Customer not found" or "Survey not found"
                         if CUSTOMER_NOT_FOUND_MESSAGE in message or SURVEY_NOT_FOUND_MESSAGE in message:
                             print("The server could not proceed. Closing connection.")
+                            return  # End the manual test
+
+                        # Check if the server sent "Survey already completed"
+                        if SURVEY_ALREADY_COMPLETED_MESSAGE in message:
+                            print("You have already completed this survey. Closing connection.")
                             return  # End the manual test
 
                         # Check if the conversation is completed

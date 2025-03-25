@@ -55,6 +55,13 @@ async def chatbot_websocket(
         state_data = await retrier.call(db.get_conversation_state, conversation_id)
         if state_data:
             state = ConversationState(**state_data)
+            # Check if the survey has already been completed
+            if state.completed:
+                await websocket.send_text(
+                    f"BOT: You have already completed this survey, {customer_info['name']}. Thank you!"
+                )
+                await websocket.close()
+                return
         else:
             state = ConversationState(
                 customer_id=customer_id,
