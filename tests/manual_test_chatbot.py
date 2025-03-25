@@ -17,6 +17,11 @@ async def interactive_chatbot():
                 print("\nConversation ended. Thank you!")
                 break
 
+            # Check if there was a technical difficulty (RPC failure)
+            if "We are experiencing technical difficulties." in message:
+                print("\nThe chatbot encountered a technical issue and cannot continue. Please try again later.")
+                break
+
             # Send a manual response
             answer = input("\nYour answer: ")
             await websocket.send(answer)

@@ -53,7 +53,7 @@ class MockRPCDatabase:
     def simulate_rpc_call():
         """Simulate network latency and possible failures."""
         time.sleep(random.uniform(0.1, 0.5))
-        if random.random() < 0.01: #less chance of failure to simulate real world
+        if random.random() < 0.1: # 10% chance of failure
             raise ConnectionError("RPC call failed")
 
     def get_conversation_state(self, conversation_id: str) -> Optional[Dict[str, Any]]:
