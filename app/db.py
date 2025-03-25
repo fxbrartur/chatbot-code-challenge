@@ -2,7 +2,7 @@ import time
 import random
 from typing import Dict, Any, Optional, List
 from app.models.models import SurveyQuestion
-from app.utils.surveys import get_survey_questions, get_survey_info
+from app.utils.surveys import get_survey_questions, get_survey_info, SURVEYS
 
 mock_db = {
     "conversations": {},
@@ -52,3 +52,38 @@ class MockRPCDatabase:
         """Retrieve survey information."""
         self.simulate_rpc_call()
         return get_survey_info(survey_id)  
+    
+    def get_all_survey_responses(self) -> List[Dict[str, Any]]:
+        """Retrieve all survey responses."""
+        self.simulate_rpc_call()
+        return mock_db["survey_responses"]
+    
+    def get_all_surveys(self) -> List[Dict[str, Any]]:
+        """Retrieve all survey."""
+        self.simulate_rpc_call()
+        return SURVEYS.values()
+
+    def create_survey(self, survey_id: str, survey_data: Dict[str, Any]) -> None:
+        """Create a new survey."""
+        self.simulate_rpc_call()
+        SURVEYS[survey_id] = survey_data
+
+    def update_survey(self, survey_id: str, survey_data: Dict[str, Any]) -> None:
+        """Update an existing survey."""
+        self.simulate_rpc_call()
+        SURVEYS[survey_id] = survey_data
+
+    def delete_survey(self, survey_id: str) -> None:
+        """Delete a survey."""
+        self.simulate_rpc_call()
+        if survey_id in SURVEYS:
+            del SURVEYS[survey_id]
+
+    def delete_survey_response(self, response_id: str) -> bool:
+        """Delete a specific survey response."""
+        self.simulate_rpc_call()
+        for i, response in enumerate(mock_db["survey_responses"]):
+            if response.get("id") == response_id:
+                del mock_db["survey_responses"][i]
+                return True
+        return False

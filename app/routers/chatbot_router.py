@@ -3,6 +3,7 @@ from app.models.models import SurveyResponse, ConversationState
 from app.db import MockRPCDatabase
 import logging
 
+
 router = APIRouter()
 db = MockRPCDatabase()
 
@@ -148,3 +149,4 @@ async def chatbot_websocket(
         except ConnectionError:
             logger.warning(f"Failed to save conversation state for customer {customer_id} after disconnection.")
         print(f"WebSocket disconnected for customer {customer_id}")
+        

@@ -3,7 +3,8 @@ from app.main import app
 
 client = TestClient(app)
 
-def test_websocket_chatbot():
+def test_websocket_chatbot_with_rpc_failures():
+    """Test the chatbot WebSocket endpoint, including handling RPC failures."""
     with client.websocket_connect("/ws/1/ice_cream_preferences") as websocket:
         try:
             # Step 1: Receive the first message

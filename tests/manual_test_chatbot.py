@@ -1,30 +1,57 @@
 import asyncio
 import websockets
 
+# WebSocket URL
+WEBSOCKET_URL = "ws://localhost:8000/ws/1/beer_preferences"
+
+# Centralized error message
+TECHNICAL_DIFFICULTIES_MESSAGE = "We are experiencing technical difficulties. Please try again later."
 
 async def interactive_chatbot():
-    uri = "ws://127.0.0.1:8000/ws/1/ice_cream_preferences" 
-    async with websockets.connect(uri) as websocket:
-        print("Connected to the chatbot! Waiting for the first question...\n")
+    retry_attempts = 3  # Maximum number of reconnection attempts
+    attempt = 0
 
-        while True:
-            # Receive a message from the chatbot
-            message = await websocket.recv()
-            print(message)
+    while attempt < retry_attempts:
+        try:
+            # Connect to the WebSocket
+            async with websockets.connect(WEBSOCKET_URL) as websocket:
+                print("Connected to the chatbot! Waiting for the first question...\n")
 
-            # Check if the survey was not found
-            if "Survey not found" in message:
-                print("\nThe requested survey does not exist. Please check the survey ID and try again.")
-                break
+                while True:
+                    try:
+                        # Receive a message from the server
+                        message = await websocket.recv()
+                        print(message)
 
-            # Check if the conversation is completed
-            if "Thank you for your time" in message:
-                print("\nConversation ended. Thank you!")
-                break
+                        # Check if the server sent an error message
+                        if TECHNICAL_DIFFICULTIES_MESSAGE in message:
+                            print("The server is experiencing technical difficulties. Closing connection.")
+                            return  # End the manual test
 
-            # Send a manual response
-            answer = input("\nYour answer: ")
-            await websocket.send(answer)
+                        # Check if the conversation is completed
+                        if "Thank you for your time" in message:
+                            print("\nConversation ended. Thank you!")
+                            return  # Exit both loops and end the script
 
-# Run the script
-asyncio.run(interactive_chatbot())
+                        # Prompt the user for a response
+                        user_input = input("Your answer: ")
+                        await websocket.send(user_input)
+
+                    except websockets.exceptions.ConnectionClosedOK:
+                        print("Connection closed by the server. Ending session.")
+                        return  # End the manual test
+
+        except websockets.exceptions.ConnectionClosedError as e:
+            print(f"Connection error: {e}. Retrying... Attempt {attempt + 1} of {retry_attempts}")
+            attempt += 1
+            await asyncio.sleep(1)  # Wait before retrying
+
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return  # End the manual test in case of an unexpected error
+
+    print("Failed to connect after multiple attempts. Please try again later.")
+
+# Run the manual test
+if __name__ == "__main__":
+    asyncio.run(interactive_chatbot())
