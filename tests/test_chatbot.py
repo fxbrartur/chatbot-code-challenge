@@ -4,7 +4,7 @@ from app.main import app
 client = TestClient(app)
 
 def test_websocket_chatbot():
-    with client.websocket_connect("/ws/1") as websocket:
+    with client.websocket_connect("ws/1/ice_cream_preferences") as websocket:
         # Receive the first question
         data = websocket.receive_json()
         assert data["question"]["id"] == 1

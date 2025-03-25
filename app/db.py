@@ -1,6 +1,7 @@
 import time
 import random
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
+from app.models.models import SurveyQuestion
 
 mock_db = {
     "conversations": {},
@@ -8,51 +9,83 @@ mock_db = {
         "1": {"name": "John Doe", "email": "john.doe@example.com"},
         "2": {"name": "Jane Smith", "email": "jane.smith@example.com"},
     },
-    "surveys": []
+    "surveys": {
+        "ice_cream_preferences": {
+            "id": "ice_cream_preferences",
+            "title": "Ice Cream Preferences Survey",
+            "questions": [
+                {
+                    "id": 1,
+                    "question": "Which flavor of ice cream do you prefer?",
+                    "options": ["Vanilla", "Chocolate", "Strawberry"]
+                },
+                {
+                    "id": 2,
+                    "question": "Would you like to provide feedback on why you selected this flavor?",
+                    "options": ["Yes", "No"]
+                }
+            ]
+        },
+        "customer_satisfaction": {
+            "id": "customer_satisfaction",
+            "title": "Customer Satisfaction Survey",
+            "questions": [
+                {
+                    "id": 1,
+                    "question": "How would you rate our service?",
+                    "options": ["Excellent", "Good", "Fair", "Poor"]
+                },
+                {
+                    "id": 2,
+                    "question": "Would you recommend us to a friend?",
+                    "options": ["Yes", "Maybe", "No"]
+                }
+            ]
+        }
+    },
+    "survey_responses": []
 }
 
-# Simulate network latency and possible failures
-def simulate_rpc_call():
-    time.sleep(random.uniform(0.1, 0.5))  # Simulate network delay
-    if random.random() < 0.1:  # 10% chance of failure
-        raise ConnectionError("RPC call failed")
-
-
 class MockRPCDatabase:
-    """
-    An example mock database.
-    Adjust and customize this file as you wish, but assume all db access is via RPCs.
-    """
+    """Mock database with RPC-like behavior."""
+
     @staticmethod
-    def get_conversation_state(conversation_id: str) -> Optional[Dict[str, Any]]:
+    def simulate_rpc_call():
+        """Simulate network latency and possible failures."""
+        time.sleep(random.uniform(0.1, 0.5))
+        if random.random() < 0.1:
+            raise ConnectionError("RPC call failed")
+
+    def get_conversation_state(self, conversation_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve the state of a conversation."""
-        simulate_rpc_call()
+        self.simulate_rpc_call()
         return mock_db["conversations"].get(conversation_id)
 
-    @staticmethod
-    def save_conversation_state(conversation_id: str, state: Dict[str, Any]) -> None:
+    def save_conversation_state(self, conversation_id: str, state: Dict[str, Any]) -> None:
         """Save or update the state of a conversation."""
-        simulate_rpc_call()
+        self.simulate_rpc_call()
         mock_db["conversations"][conversation_id] = state
 
-    @staticmethod
-    def get_customer_info(customer_id: str) -> Optional[Dict[str, Any]]:
+    def get_customer_info(self, customer_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve customer information."""
-        simulate_rpc_call()
+        self.simulate_rpc_call()
         return mock_db["customers"].get(customer_id)
 
-    @staticmethod
-    def save_survey_response(response: Dict[str, Any]) -> None:
+    def save_survey_response(self, response: Dict[str, Any]) -> None:
         """Save a survey response."""
-        simulate_rpc_call()
-        mock_db["surveys"].append(response)
+        self.simulate_rpc_call()
+        mock_db["survey_responses"].append(response)
 
+    def get_survey_questions(self, survey_id: str) -> Optional[List[SurveyQuestion]]:
+        """Retrieve questions for a specific survey."""
+        self.simulate_rpc_call()
+        survey = mock_db["surveys"].get(survey_id)
+        if not survey:
+            return None
 
-# Example usage (commented out, meant for testing)
-# if __name__ == "__main__":
-#     db = MockRPCDatabase()
-#     print("Fetching customer info:", db.get_customer_info("1"))
-#     db.save_conversation_state("conv123", {"messages": ["Hi!", "Hello!"]})
-#     print("Conversation state:", db.get_conversation_state("conv123"))
-#     db.save_survey_response({"customer_id": "1", "feedback": "Great service!"})
-#     print("Surveys:", mock_db["surveys"])
+        return [SurveyQuestion(**q) for q in survey["questions"]]
+
+    def get_survey_info(self, survey_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieve survey information."""
+        self.simulate_rpc_call()
+        return mock_db["surveys"].get(survey_id)

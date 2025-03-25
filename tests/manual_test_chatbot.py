@@ -4,7 +4,7 @@ import json
 
 
 async def interactive_chatbot():
-    uri = "ws://127.0.0.1:8000/ws/1"  # Replace "1" with the desired customer ID
+    uri = "ws://127.0.0.1:8000/ws/1/ice_cream_preferences"  # Replace "1" with the desired customer ID and ice_cream_preferences with the desired survey ID
     async with websockets.connect(uri) as websocket:
         print("Connected to the chatbot! Waiting for the first question...\n")
 

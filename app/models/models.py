@@ -16,3 +16,4 @@ class ConversationState(BaseModel):
     current_question: Optional[int] = None
     completed: bool = False
     responses: List[SurveyResponse] = []
+    survey_id: str
