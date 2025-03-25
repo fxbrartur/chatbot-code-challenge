@@ -1,11 +1,13 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.models.models import SurveyResponse, ConversationState
 from app.db import MockRPCDatabase
+from app.utils.rpc_retrier_wrapper import RPCRetrier
 import logging
 
 
 router = APIRouter()
 db = MockRPCDatabase()
+retrier = RPCRetrier(max_retries=3, retry_delay=1)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -23,9 +25,9 @@ async def chatbot_websocket(
     """WebSocket endpoint for the chatbot."""
     await websocket.accept()
 
-    # Retrieve customer info with error handling
+    # Retrieve customer info with retry logic
     try:
-        customer_info = db.get_customer_info(customer_id)
+        customer_info = await retrier.call(db.get_customer_info, customer_id)
         if not customer_info:
             await websocket.send_text("Customer not found.")
             await websocket.close()
@@ -35,9 +37,9 @@ async def chatbot_websocket(
         await websocket.close()
         return
 
-    # Retrieve survey questions with error handling
+    # Retrieve survey questions with retry logic
     try:
-        survey_questions = db.get_survey_questions(survey_id)
+        survey_questions = await retrier.call(db.get_survey_questions, survey_id)
         if not survey_questions:
             await websocket.send_text("Survey not found.")
             await websocket.close()
@@ -47,10 +49,10 @@ async def chatbot_websocket(
         await websocket.close()
         return
 
-    # Initialize or retrieve conversation state
+    # Initialize or retrieve conversation state with retry logic
     conversation_id = f"conv_{customer_id}_{survey_id}"
     try:
-        state_data = db.get_conversation_state(conversation_id)
+        state_data = await retrier.call(db.get_conversation_state, conversation_id)
         if state_data:
             state = ConversationState(**state_data)
         else:
@@ -61,7 +63,7 @@ async def chatbot_websocket(
                 responses=[],
                 survey_id=survey_id
             )
-            db.save_conversation_state(conversation_id, state.model_dump())
+            await retrier.call(db.save_conversation_state, conversation_id, state.model_dump())
     except ConnectionError:
         await websocket.send_text(TECHNICAL_DIFFICULTIES_MESSAGE)
         await websocket.close()
@@ -110,10 +112,10 @@ async def chatbot_websocket(
                     )
                     continue
 
-            # Save the response with error handling
+            # Save the response with retry logic
             try:
                 state.responses.append(response)
-                db.save_survey_response(response.model_dump())
+                await retrier.call(db.save_survey_response, response.model_dump())
             except ConnectionError:
                 await websocket.send_text(TECHNICAL_DIFFICULTIES_MESSAGE)
                 await websocket.close()
@@ -124,7 +126,7 @@ async def chatbot_websocket(
             if state.current_question > len(survey_questions):  # Check if it's the last question
                 state.completed = True
                 try:
-                    db.save_conversation_state(conversation_id, state.model_dump())
+                    await retrier.call(db.save_conversation_state, conversation_id, state.model_dump())
                 except ConnectionError:
                     await websocket.send_text(TECHNICAL_DIFFICULTIES_MESSAGE)
                     await websocket.close()
@@ -134,9 +136,9 @@ async def chatbot_websocket(
                 )
                 break
 
-            # Save the updated state with error handling
+            # Save the updated state with retry logic
             try:
-                db.save_conversation_state(conversation_id, state.model_dump())
+                await retrier.call(db.save_conversation_state, conversation_id, state.model_dump())
             except ConnectionError:
                 await websocket.send_text(TECHNICAL_DIFFICULTIES_MESSAGE)
                 await websocket.close()
@@ -145,8 +147,7 @@ async def chatbot_websocket(
     except WebSocketDisconnect:
         # Handle disconnection gracefully
         try:
-            db.save_conversation_state(conversation_id, state.model_dump())
+            await retrier.call(db.save_conversation_state, conversation_id, state.model_dump())
         except ConnectionError:
             logger.warning(f"Failed to save conversation state for customer {customer_id} after disconnection.")
         print(f"WebSocket disconnected for customer {customer_id}")
-        
