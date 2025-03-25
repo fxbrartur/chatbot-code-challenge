@@ -1,6 +1,5 @@
 import asyncio
 import websockets
-import json
 
 
 async def interactive_chatbot():
@@ -11,31 +10,16 @@ async def interactive_chatbot():
         while True:
             # Receive a message from the chatbot
             message = await websocket.recv()
-            try:
-                # Try to parse the message as JSON (chatbot question)
-                data = json.loads(message)
-                if "question" in data:
-                    print(f"Bot: {data['question']}")
-                    print(f"Options: {', '.join(data.get('options', []))}")
-                else:
-                    print(f"Bot: {message}")
-            except json.JSONDecodeError:
-                # If the message is not JSON, display it as plain text
-                print(f"Bot: {message}")
+            print(message)
 
             # Check if the conversation is completed
-            if "Thank you for completing the survey!" in message:
+            if "Thank you for your time" in message:
                 print("\nConversation ended. Thank you!")
                 break
 
             # Send a manual response
             answer = input("\nYour answer: ")
-            response = {
-                "customer_id": "1",  # Replace with the correct customer ID if needed
-                "question_id": data.get("id", 0),  # Current question ID
-                "answer": answer
-            }
-            await websocket.send(json.dumps(response))
+            await websocket.send(answer)
 
 # Run the script
 asyncio.run(interactive_chatbot())
