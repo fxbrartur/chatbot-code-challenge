@@ -3,7 +3,7 @@ import websockets
 
 
 async def interactive_chatbot():
-    uri = "ws://127.0.0.1:8000/ws/1/ice_cream_preferences"  # Replace "1" with the desired customer ID and ice_cream_preferences with the desired survey ID
+    uri = "ws://127.0.0.1:8000/ws/1/ice_cream_preferences" 
     async with websockets.connect(uri) as websocket:
         print("Connected to the chatbot! Waiting for the first question...\n")
 
@@ -12,14 +12,14 @@ async def interactive_chatbot():
             message = await websocket.recv()
             print(message)
 
+            # Check if the survey was not found
+            if "Survey not found" in message:
+                print("\nThe requested survey does not exist. Please check the survey ID and try again.")
+                break
+
             # Check if the conversation is completed
             if "Thank you for your time" in message:
                 print("\nConversation ended. Thank you!")
-                break
-
-            # Check if there was a technical difficulty (RPC failure)
-            if "We are experiencing technical difficulties." in message:
-                print("\nThe chatbot encountered a technical issue and cannot continue. Please try again later.")
                 break
 
             # Send a manual response
