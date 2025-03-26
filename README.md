@@ -142,8 +142,3 @@ The chatbot uses WebSocket for real-time interaction with users. This allows for
 - **Authentication:** Add authentication and authorization for admin and chatbot endpoints.
 - **Frontend:** Develop a frontend interface for interacting with the chatbot and admin controls.
 - **Error Handling:** Enhance error handling and logging for better debugging and monitoring.
-
----
-
-## Video Explanation
-
